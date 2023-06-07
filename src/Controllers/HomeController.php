@@ -1,7 +1,17 @@
 <?php
+require_once '../src/models/HomeModel.php';
 
 class HomeController
 {
+    private $model;
+ 
+    public function __construct() {
+
+    require_once '../src/config/database.php';
+    
+        $this->model = new HomeModel();
+        $this->model->connectWithDataBase($config);
+    }
     public function home()
     {
         // Logika biznesowa dla strony głównej
