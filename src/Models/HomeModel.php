@@ -10,5 +10,22 @@ class HomeModel {
         }
 
     }
+    public function fetchDataFromAPI() {
+        $url =  "http://api.nbp.pl/api/exchangerates/tables/a";
+        $curl = curl_init($url);
+
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($curl);
+        if($response !== false) {
+            $data = json_decode($response,true);
+            
+            return $data;
+        } else {
+            echo "U cant fetch here";
+            return null;
+        }
+      
+    }
 }
 ?>
