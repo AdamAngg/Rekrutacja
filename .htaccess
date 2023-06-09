@@ -3,23 +3,3 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ public/index.php [L]
 
-
-RewriteCond %{QUERY_STRING} concat.*\( [NC,OR]
-RewriteCond %{QUERY_STRING} union.*select.*\( [NC,OR]
-RewriteCond %{QUERY_STRING} order.*by.*\" [NC,OR]
-RewriteCond %{QUERY_STRING} waitfor.*delay [NC,OR]
-RewriteCond %{QUERY_STRING} from.*information_schema [NC]
-RewriteRule ^(.*)$ - [F,L]
-
-RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
-RewriteCond %{QUERY_STRING} (\<|%3C)([^=]+)=*([^&]+)(\>|%3E) [NC,OR]
-RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
-RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2})
-RewriteRule ^(.*)$ - [F,L]
-
-<Files ~ "^\.ht">
- Order allow,deny
- Deny from all
-</Files>
-
-Options -Indexes
