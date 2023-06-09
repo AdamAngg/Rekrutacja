@@ -15,8 +15,6 @@ class HomeController
         
         $this->model = new HomeModel();
         
-        $this->model->fetchDataFromAPI();  
-        
         $this->model->passDataToDB();
 
         // Logika biznesowa dla strony głównej

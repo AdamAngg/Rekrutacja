@@ -1,14 +1,17 @@
 <?php 
 class HomeModel {
     private $database;
-    
-    private $data;
+   
+    private $dataAPI;
+
+    private $dataDB;
+
     //łączenie z baza danych
     public function __construct(){
-       
+       $this->fetchDataFromAPI();
     }
 
-    private function connectWithDataBase(){
+    private function connectWithDatabase(){
         require_once '../src/config/database.php';
         $this->database = new mysqli($config['host'], $config['username'], $config['password'], $config['database']);
 
@@ -18,7 +21,7 @@ class HomeModel {
         }
 
     }
-    public function fetchDataFromAPI() {
+    private function fetchDataFromAPI() {
         $url =  "http://api.nbp.pl/api/exchangerates/tables/a";
         $curl = curl_init($url);
 
@@ -27,8 +30,8 @@ class HomeModel {
         $response = curl_exec($curl);
        
         if($response !== false ) {
-            $this->data = json_decode($response,true);        
-            return $this->data;
+            $this->dataAPI = json_decode($response,true);        
+            return $this->dataAPI;
         } else {
             $error_code = curl_errno($curl);
             echo "An error occurred with API connection  $error_code";
@@ -39,24 +42,55 @@ class HomeModel {
     }
     public function passDataToDB() {
     
-    $this->connectWithDataBase();
-       if($this->database === null) echo "An error occurred with sending data"; 
+    $this->connectWithDatabase();
+    $selectAllQuery = "SELECT * FROM currencies";
+    $this->dataDB = $this->database->query($selectAllQuery);
+
+       if($this->database === null) {
+        echo "An error occurred with sending database connection"; 
+        return ;
+    }
        
-       $deleteQuery = "DELETE FROM currencies";
-       $deleteResult = $this->database->query($deleteQuery);
-
-
-        foreach($this->data[0]['rates'] as $currency) {
+       if($this->dataDB->num_rows > 0) {
+           foreach($this->dataAPI[0]['rates'] as $currency){
 
             $currencyName = $this->database->real_escape_string($currency['currency']);
             $currencyCode = $this->database->real_escape_string($currency['code']);
             $currencyMid = $currency['mid'];
 
-            $query = "INSERT INTO currencies (currency, code, mid) VALUES ('$currencyName', '$currencyCode', '$currencyMid')";
+            $singleRecordQuery = "SELECT * FROM currencies WHERE currency = '$currencyName' AND code = '$currencyCode'";
+            $result = $this->database->query($singleRecordQuery);
+            
 
-           $result = $this->database->query($query);
+            $databaseRecord = $this->dataDB->fetch_assoc();
+
+            if($databaseRecord['currency'] === $currencyName && $databaseRecord['mid'] !== $currencyMid){
+                $updateSingleRecordQuery = "UPDATE currencies SET mid = '$currencyMid' WHERE id = ".$databaseRecord['id'];
+
+                $this->database->query($updateSingleRecordQuery);
+            }
+            if($result->num_rows === 0 ){
+                $insertSingleRecordQuery = "INSERT INTO currencies (currency, code, mid) VALUES ('$currencyName', '$currencyCode', '$currencyMid')";
+
+                $this->database->query($insertSingleRecordQuery);
+            }
+           }
+       } else {
+
+        foreach($this->dataAPI[0]['rates'] as $currency) {
+
+            $currencyName = $this->database->real_escape_string($currency['currency']);
+            $currencyCode = $this->database->real_escape_string($currency['code']);
+            $currencyMid = $currency['mid'];
+
+            $insertQuery = "INSERT INTO currencies (currency, code, mid) VALUES ('$currencyName', '$currencyCode', '$currencyMid')";
+
+            $result = $this->database->query($insertQuery);
             if(!$result) echo "An error occurred with query ".$this->database->error;
         }
+
+       }
+
         $this->database->close();
     }
 }
