@@ -2,7 +2,7 @@
 
 require '../src/Controllers/HomeController.php';
 
-// Tworzenie instancji kontrolera
+// Tworzenie kontrolera
 $controller = new HomeController();
 
 // Wywołanie odpowiedniej metody w zależności od żądania

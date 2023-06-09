@@ -22,10 +22,11 @@ class HomeModel {
             
             return $data;
         } else {
-            echo "U cant fetch here";
-            return null;
+            $error_code = curl_errno($curl);
+            echo "An error occurred $error_code";
+           
         }
-      
+      curl_close($curl);
     }
 }
 ?>

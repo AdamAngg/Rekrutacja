@@ -16,7 +16,7 @@ class HomeController
             $this->model = new HomeModel();
             $this->model->connectWithDataBase($config);
        $data =  $this->model->fetchDataFromAPI();  
-       var_dump($data[0]['rates']);
+       var_dump($data[0]['rates'][0]['currency']);
         // Logika biznesowa dla strony głównej
         // Pobranie danych z modelu, przetworzenie ich
         // i przekazanie do widoku
