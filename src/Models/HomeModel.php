@@ -109,7 +109,7 @@ class HomeModel {
         }
         return $tableMarkUp;
         }
-   
+    
     }
 
 ?>

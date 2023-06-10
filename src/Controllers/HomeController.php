@@ -8,6 +8,14 @@ class HomeController
     public function __construct() {
    
     }
+    public function conversion($amount, $currencyFrom, $currencyTo) {
+        if(filter_var($amount,FILTER_VALIDATE_FLOAT) && filter_var($currencyFrom, $currencyTo,FILTER_VALIDATE_FLOAT)){
+            return 0;
+        }
+        $convertedAmount = round(($amount/$currencyTo)*$currencyFrom,2);
+        
+        
+    }
     public function home()
     {
         require_once '../src/models/HomeModel.php';
@@ -16,12 +24,12 @@ class HomeController
         $this->model = new HomeModel();
         
         $tableMarkUp = $this->model->generateTable();
-        $currencies = $this->model->$dataDB;
+        $currencies = $this->model->dataDB;
 
-        // Logika biznesowa dla strony głównej
-        // Pobranie danych z modelu, przetworzenie ich
-        // i przekazanie do widoku
-
+        if (isset($_POST['amount'])) {
+            $this->conversion($_POST['amount'],$_POST['currencyFrom'],$_POST['currencyTo']);
+        }
+       
         require '../src/views/home.php';
     }
 

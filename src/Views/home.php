@@ -12,25 +12,29 @@
     <h1>Witam na mojej stronie</h1>
     <?= $tableMarkUp ?>
 
-    <form action="HomeModel.php" method="POST">
-        <label for="amountFrom">Amount:</label>
-        <input type="text" id="amountFrom" name="amount">
+    <form action="HomeController.php" method="POST">
+        <label for="amount">Amount:</label>
+        <input type="text" id="amount" name="amount">
 
-        <label for="currencyFrom">Currency:</label>
-        <select id="currencyFrom" name="currency">
-            <?php foreach ($currencies as $currency): ?>
-                <option value="<?php echo $currency['code']; ?>"><?php echo $currency['currency']; ?></option>
-            <?php endforeach; ?>
-        </select>
-        <label for="amountTo">Amount:</label>
-        <input type="text" id="amountTo" name="amount">
+        <label for="currencyFrom">From:</label>
+        <select id="currencyFrom" name="currencyFrom">
 
-        <label for="currencyTo">Currency:</label>
-        <select id="currencyTo" name="currency">
             <?php foreach ($currencies as $currency): ?>
-                <option value="<?php echo $currency['code']; ?>"><?php echo $currency['currency']; ?></option>
+                <option value="<?php echo $currency['mid']; ?>"><?php echo $currency['code']."-".$currency['currency']; ?></option>
             <?php endforeach; ?>
+
         </select>
+
+        
+        <label for="currencyTo">To:</label>
+        <select id="currencyTo" name="currencyTo">
+
+            <?php foreach ($currencies as $currency): ?>
+                <option value="<?php echo $currency['mid']; ?>"><?php echo $currency['code']."-".$currency['currency']; ?></option>
+            <?php endforeach; ?>
+
+        </select>
+
         <input type="submit" value="Send">
     </form>
 </body>
