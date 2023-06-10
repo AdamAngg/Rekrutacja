@@ -16,6 +16,7 @@ class HomeController
         $this->model = new HomeModel();
         
         $this->model->passDataToDB();
+        $this->model->generateTable();
 
         // Logika biznesowa dla strony głównej
         // Pobranie danych z modelu, przetworzenie ich

@@ -46,36 +46,32 @@ class HomeModel {
     $selectAllQuery = "SELECT * FROM currencies";
     $this->dataDB = $this->database->query($selectAllQuery);
 
-       if($this->database === null) {
-        echo "An error occurred with sending database connection"; 
-        return ;
-    }
-       
        if($this->dataDB->num_rows > 0) {
-           foreach($this->dataAPI[0]['rates'] as $currency){
+        foreach($this->dataAPI[0]['rates'] as $currency){
 
             $currencyName = $this->database->real_escape_string($currency['currency']);
             $currencyCode = $this->database->real_escape_string($currency['code']);
             $currencyMid = $currency['mid'];
-
+        
             $singleRecordQuery = "SELECT * FROM currencies WHERE currency = '$currencyName' AND code = '$currencyCode'";
-            $result = $this->database->query($singleRecordQuery);
-            
-
-            $databaseRecord = $this->dataDB->fetch_assoc();
-
-            if($databaseRecord['currency'] === $currencyName && $databaseRecord['mid'] !== $currencyMid){
-                $updateSingleRecordQuery = "UPDATE currencies SET mid = '$currencyMid' WHERE id = ".$databaseRecord['id'];
-
-                $this->database->query($updateSingleRecordQuery);
+        
+            try {
+                $result = $this->database->query($singleRecordQuery);
+                $databaseRecord = $result->fetch_assoc();
+        
+                if($databaseRecord['currency'] === $currencyName && $databaseRecord['mid'] !== $currencyMid){
+                    $updateSingleRecordQuery = "UPDATE currencies SET mid = '$currencyMid' WHERE id = ".$databaseRecord['id'];
+                    $this->database->query($updateSingleRecordQuery);
+                }
+                if($result->num_rows === 0 ){
+                    $insertSingleRecordQuery = "INSERT INTO currencies (currency, code, mid) VALUES ('$currencyName', '$currencyCode', '$currencyMid')";
+                    $this->database->query($insertSingleRecordQuery);
+                }
+            } catch (Exception $e) {
+                echo "An error occured with database query: " .$e->getMessage();
             }
-            if($result->num_rows === 0 ){
-                $insertSingleRecordQuery = "INSERT INTO currencies (currency, code, mid) VALUES ('$currencyName', '$currencyCode', '$currencyMid')";
-
-                $this->database->query($insertSingleRecordQuery);
-            }
-           }
-       } else {
+        }
+    } else {
 
         foreach($this->dataAPI[0]['rates'] as $currency) {
 
@@ -85,13 +81,17 @@ class HomeModel {
 
             $insertQuery = "INSERT INTO currencies (currency, code, mid) VALUES ('$currencyName', '$currencyCode', '$currencyMid')";
 
-            $result = $this->database->query($insertQuery);
-            if(!$result) echo "An error occurred with query ".$this->database->error;
+            try{
+               $result = $this->database->query($insertQuery);
+            } catch (Exception $e) {
+                echo "An error occured with database query: ". $e->getMessage();
+            }  
         }
-
        }
-
         $this->database->close();
     }
-}
+
+   
+    }
+
 ?>
