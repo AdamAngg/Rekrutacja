@@ -4,11 +4,12 @@ class HomeModel {
    
     private $dataAPI;
 
-    private $dataDB;
+    public $dataDB;
 
     //łączenie z baza danych
     public function __construct(){
        $this->fetchDataFromAPI();
+       $this->passDataToDB();
     }
 
     private function connectWithDatabase(){
@@ -40,7 +41,7 @@ class HomeModel {
         }
       curl_close($curl);
     }
-    public function passDataToDB() {
+    private function passDataToDB() {
     
     $this->connectWithDatabase();
     $selectAllQuery = "SELECT * FROM currencies";
@@ -90,7 +91,24 @@ class HomeModel {
        }
         $this->database->close();
     }
-
+    public function generateTable() {
+        $tableMarkUp = '';
+        if($this->dataDB->num_rows > 0){
+            $tableMarkUp .= "<table>";
+            $tableMarkUp .=  "<tr><th>Currency</th><th>Code</th><th>Mid</th></tr>";
+            while ($row = $this->dataDB->fetch_assoc()) {
+                $tableMarkUp .=  "<tr>";
+                $tableMarkUp .=  "<td>" . $row['currency'] . "</td>";
+                $tableMarkUp .=  "<td>" . $row['code'] . "</td>";
+                $tableMarkUp .=  "<td>" . $row['mid'] . "</td>";
+                $tableMarkUp .=  "</tr>";
+            }
+            $tableMarkUp .=  "</table>";
+        } else {
+            $tableMarkUp .=  "No data available.";
+        }
+        return $tableMarkUp;
+        }
    
     }
 
