@@ -32,15 +32,14 @@ class HomeModel {
         $response = curl_exec($curl);
        
         if($response !== false ) {
-            $this->dataAPI = json_decode($response,true);        
+            $this->dataAPI = json_decode($response,true);   
+            curl_close($curl);     
             return $this->dataAPI;
         } else {
             $error_code = curl_errno($curl);
-            echo "An error occurred with API connection  $error_code";
-            return null;
-           
+            curl_close($curl);
+            throw new Exception("Api error".$error_code);  
         }
-      curl_close($curl);
     }
     private function passDataToDB() {
     
@@ -57,20 +56,20 @@ class HomeModel {
         
             $singleRecordQuery = "SELECT * FROM currencies WHERE currency = '$currencyName' AND code = '$currencyCode'";
         
-            try {
-                $result = $this->database->query($singleRecordQuery);
-                $databaseRecord = $result->fetch_assoc();
+            $result = $this->database->query($singleRecordQuery);
+            $databaseRecord = $result->fetch_assoc();
         
-                if($databaseRecord['currency'] === $currencyName && $databaseRecord['mid'] !== $currencyMid){
-                    $updateSingleRecordQuery = "UPDATE currencies SET mid = '$currencyMid' WHERE id = ".$databaseRecord['id'];
-                    $this->database->query($updateSingleRecordQuery);
-                }
-                if($result->num_rows === 0 ){
-                    $insertSingleRecordQuery = "INSERT INTO currencies (currency, code, mid) VALUES ('$currencyName', '$currencyCode', '$currencyMid')";
-                    $this->database->query($insertSingleRecordQuery);
-                }
-            } catch (Exception $e) {
-                echo "An error occured with database query: " .$e->getMessage();
+            if($databaseRecord['currency'] === $currencyName && $databaseRecord['mid'] !== $currencyMid){
+                $updateSingleRecordQuery = "UPDATE currencies SET mid = '$currencyMid' WHERE id = ".$databaseRecord['id'];
+                $updateResult = $this->database->query($updateSingleRecordQuery);
+
+                if(!$updateResult) throw new Exception($this->database->error);
+            }
+            if($result->num_rows === 0 ){
+                $insertSingleRecordQuery = "INSERT INTO currencies (currency, code, mid) VALUES ('$currencyName', '$currencyCode', '$currencyMid')";
+                $insertResult = $this->database->query($insertSingleRecordQuery);
+
+                if(!$insertResult) throw new Exception($this->database->error);
             }
         }
     } else {
@@ -83,11 +82,9 @@ class HomeModel {
 
             $insertQuery = "INSERT INTO currencies (currency, code, mid) VALUES ('$currencyName', '$currencyCode', '$currencyMid')";
 
-            try{
-               $result = $this->database->query($insertQuery);
-            } catch (Exception $e) {
-                echo "An error occured with database query: ". $e->getMessage();
-            }  
+            $result = $this->database->query($insertQuery);
+            if(!$result) throw new Exception($this->database->error);
+           
         }
         $this->database->close();
        }
@@ -114,7 +111,7 @@ class HomeModel {
     
     public function addLatestConversions($idFrom, $idTo, $convertedAmount) {
        
-        $this->connectWithDatabase();
+        
         $insertQuery = " INSERT INTO conversions (convertedAmount, midFrom, codeFrom, currencyFrom, midTo, codeTo, currencyTo)
         SELECT
             '$convertedAmount' AS convertedAmount,
@@ -126,12 +123,11 @@ class HomeModel {
             (SELECT currency FROM currencies WHERE id = '$idTo') AS currencyTo;
     ";
        
-        try{
+        
+            $this->connectWithDatabase();
             $result = $this->database->query($insertQuery);
             if(!$result) throw new Exception($this->database->error);
-        } catch (Exception $e) {
-            echo "An error occured with database query: ". $e->getMessage();
-        }
+        
         $this->database->close();
     }
     }

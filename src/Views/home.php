@@ -38,5 +38,6 @@
 
         <input type="submit" value="Send">
     </form>
+    <?= $error ?>
 </body>
 </html>

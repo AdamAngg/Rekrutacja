@@ -4,9 +4,9 @@
 class HomeController
 {
     private $model;
- 
+     
     public function __construct() {
-   
+    
     }
     public function conversion($amount, $currencyFrom, $currencyTo) {
         $currencyFromInfo = explode('|',$currencyFrom);
@@ -22,8 +22,8 @@ class HomeController
         $digitArray = [$amount,$midFrom, $idFrom, $midTo, $idTo];
         foreach($digitArray as $digit){
         if(!(filter_var($digit,FILTER_VALIDATE_FLOAT))){
-            echo "An error ocured, added value is not a number. Please re-enter. Wrong value: ".$digit;
-            return 0;
+            throw new Exception("added value is not a number. Please re-enter. Wrong value: ".$digit);
+            break; 
         }}
 
         $convertedAmount = round(($amount/$midTo)*$midFrom,2);
@@ -33,20 +33,21 @@ class HomeController
         
         
     }
-    public function home()
-    {
+    public function home(){
         require_once '../src/models/HomeModel.php';
-       
-        
-        $this->model = new HomeModel();
-        
+        $error = "";
+
+    try{
+        $this->model = new HomeModel();  
         $tableMarkUp = $this->model->generateMarkUPTable();
-        $currencies = $this->model->dataDB;
+        $currencies = $this->model->dataDB;  
 
         if (isset($_POST['amount'])) {
             $this->conversion($_POST['amount'],$_POST['currencyFrom'],$_POST['currencyTo']);
         }
-       
+    } catch (Exception $e){
+           $error = "An error occured: ".$e->getMessage();
+    }  
         require '../src/views/home.php';
     }
 
