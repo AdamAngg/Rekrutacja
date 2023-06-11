@@ -6,7 +6,7 @@ class HomeController
     private $model;
      
     public function __construct() {
-    
+        
     }
     public function conversion($amount, $currencyFrom, $currencyTo) {
         //tworze tablice z dwoma zmiennymi 
@@ -23,13 +23,18 @@ class HomeController
         //sprawdzam dla zmiennej czy jest zmienną jeżeli nie wysyłam wyjątek
         $digitArray = [$amount,$midFrom, $idFrom, $midTo, $idTo];
         foreach($digitArray as $digit){
-        if(!(filter_var($digit,FILTER_VALIDATE_FLOAT))){
+        if(!(filter_var($digit,FILTER_VALIDATE_FLOAT)) && $amount !== ""){
             throw new Exception("added value is not a number. Please re-enter. Wrong value: ".$digit);
             break; 
         }}
-        //przewalutowana wartość
-        $convertedAmount = round(($amount/$midTo)*$midFrom,2);
-        $amount !== ""? $this->model->addLatestConversions($idFrom, $idTo, $convertedAmount) :  throw new Exception("Fill missing field");
+        
+        if($amount !== ""){ 
+            //przewalutowana wartość
+            $convertedAmount = round(($amount/$midTo)*$midFrom,2);
+            $this->model->addLatestConversions($idFrom, $idTo, $convertedAmount);
+        } else {  
+        throw new Exception("Fill missing field");
+        }
         
         
     }
@@ -43,9 +48,11 @@ class HomeController
         $tableMarkUp = $this->model->generateMarkUPTable();
         $currencies = $this->model->dataCurrencies;
         $tableMarkUpLatestConversion = $this->model->generateMarkUPTableLatestConversions();  
-
+        
         if (isset($_POST['amount'])) {
             $this->conversion($_POST['amount'],$_POST['currencyFrom'],$_POST['currencyTo']);
+            header('Location: /adrespect/');
+            exit();
         }
     //obsługa wyjątków 
     } catch (Exception $e){
