@@ -40,7 +40,8 @@ class HomeController
     try{
         $this->model = new HomeModel();  
         $tableMarkUp = $this->model->generateMarkUPTable();
-        $currencies = $this->model->dataDB;  
+        $currencies = $this->model->dataCurrencies;
+        $tableMarkUpLatestConversion = $this->model->generateMarkUPTableLatestConversions();  
 
         if (isset($_POST['amount'])) {
             $this->conversion($_POST['amount'],$_POST['currencyFrom'],$_POST['currencyTo']);

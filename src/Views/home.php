@@ -11,6 +11,8 @@
 <body>
     <h1>Witam na mojej stronie</h1>
     <?= $tableMarkUp ?>
+    <h1>Cos</h1>
+    <?= $tableMarkUpLatestConversion ?>
    
 
     <form action="HomeController.php" method="POST">

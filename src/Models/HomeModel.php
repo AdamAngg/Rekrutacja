@@ -4,7 +4,9 @@ class HomeModel {
    
     private $dataAPI;
 
-    public $dataDB;
+    public $dataCurrencies;
+    
+    public $dataConversions;
 
     //łączenie z baza danych
     public function __construct(){
@@ -41,13 +43,17 @@ class HomeModel {
             throw new Exception("Api error".$error_code);  
         }
     }
+    private function getDataFromDB(){
+        $this->connectWithDatabase();
+        $selectAllQuery = "SELECT * FROM currencies";
+        $this->dataCurrencies = $this->database->query($selectAllQuery);
+        $this->database->close();
+    }
     private function passDataToDB() {
-    
-    $this->connectWithDatabase();
-    $selectAllQuery = "SELECT * FROM currencies";
-    $this->dataDB = $this->database->query($selectAllQuery);
+        $this->getDataFromDB();
+        $this->connectWithDatabase(); 
 
-       if($this->dataDB->num_rows > 0) {
+       if($this->dataCurrencies->num_rows > 0) {
         foreach($this->dataAPI[0]['rates'] as $currency){
 
             $currencyName = $this->database->real_escape_string($currency['currency']);
@@ -91,11 +97,11 @@ class HomeModel {
       
     }
     public function generateMarkUPTable() {
-        $tableMarkUp = '';
-        if($this->dataDB->num_rows > 0){
+        $tableMarkUp = " ";
+        if($this->dataCurrencies->num_rows > 0){
             $tableMarkUp .= "<table>";
             $tableMarkUp .=  "<tr><th>Currency</th><th>Code</th><th>Mid</th></tr>";
-            foreach ($this->dataDB as $row) {
+            foreach ($this->dataCurrencies as $row) {
                 $tableMarkUp .=  "<tr>";
                 $tableMarkUp .=  "<td>" . $row['currency'] . "</td>";
                 $tableMarkUp .=  "<td>" . $row['code'] . "</td>";
@@ -108,7 +114,29 @@ class HomeModel {
         }
         return $tableMarkUp;
         }
-    
+    public function generateMarkUPTableLatestConversions() {
+        $this->getLatestDataConversions();
+        $tableMarkUp = " ";
+        if($this->dataConversions->num_rows > 0){
+            $tableMarkUp .= "<table>";
+            $tableMarkUp .=  "<tr><th>Amount Converted</th><th>Mid</th><th>Code</th><th>Currency</th><th>Mid</th><th>Code</th><th>Currency</th></tr>";
+            foreach ($this->dataConversions as $row) {
+                $tableMarkUp .=  "<tr>";
+                $tableMarkUp .=  "<td>" . $row['convertedAmount'] . "</td>";
+                $tableMarkUp .=  "<td>" . $row['midFrom'] . "</td>";
+                $tableMarkUp .=  "<td>" . $row['codeFrom'] . "</td>";
+                $tableMarkUp .=  "<td>" . $row['currencyFrom'] . "</td>";
+                $tableMarkUp .=  "<td>" . $row['midTo'] . "</td>";
+                $tableMarkUp .=  "<td>" . $row['codeTo'] . "</td>";
+                $tableMarkUp .=  "<td>" . $row['currencyTo'] . "</td>";
+                $tableMarkUp .=  "</tr>";
+            }
+            $tableMarkUp .=  "</table>";
+        } else {
+            $tableMarkUp .=  "No data available.";
+        }
+        return $tableMarkUp;
+        }
     public function addLatestConversions($idFrom, $idTo, $convertedAmount) {
        
         
@@ -128,6 +156,12 @@ class HomeModel {
             $result = $this->database->query($insertQuery);
             if(!$result) throw new Exception($this->database->error);
         
+        $this->database->close();
+    }
+    public function getLatestDataConversions(){
+        $selectQuery = "SELECT * FROM conversions";
+        $this->connectWithDatabase();
+        $this->dataConversions = $this->database->query($selectQuery);
         $this->database->close();
     }
     }
