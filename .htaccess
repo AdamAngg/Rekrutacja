@@ -3,3 +3,7 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ public/index.php [L]
 
+<Files "database.php">
+    Order Allow,Deny
+    Deny from all
+</Files>

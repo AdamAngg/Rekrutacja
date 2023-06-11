@@ -11,16 +11,21 @@ class HomeController
     public function conversion($amount, $currencyFrom, $currencyTo) {
         $currencyFromInfo = explode('|',$currencyFrom);
         $midFrom = $currencyFromInfo[0];
-        $idFrom = $currencyFromInfo[1];
+        isset($currencyFromInfo[1]) ? $idFrom = $currencyFromInfo[1] : $idFrom = "";
+        
 
         $currencyToInfo = explode('|',$currencyTo);
         $midTo = $currencyToInfo[0];
-        $idTo = $currencyToInfo[1];
+        isset($currencyTo[1])? $idTo = $currencyToInfo[1] : $idTo = "";
+       
         
-        if(!(filter_var($amount,FILTER_VALIDATE_FLOAT))){
-            echo "An error ocured, added value is not a number. Please re-enter";
+        $digitArray = [$amount,$midFrom, $idFrom, $midTo, $idTo];
+        foreach($digitArray as $digit){
+        if(!(filter_var($digit,FILTER_VALIDATE_FLOAT))){
+            echo "An error ocured, added value is not a number. Please re-enter. Wrong value: ".$digit;
             return 0;
-        }
+        }}
+
         $convertedAmount = round(($amount/$midTo)*$midFrom,2);
         if($amount !== ""){
             $this->model->addLatestConversions($idFrom, $idTo, $convertedAmount);

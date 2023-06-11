@@ -89,6 +89,7 @@ class HomeModel {
                 echo "An error occured with database query: ". $e->getMessage();
             }  
         }
+        $this->database->close();
        }
       
     }
@@ -112,8 +113,8 @@ class HomeModel {
         }
     
     public function addLatestConversions($idFrom, $idTo, $convertedAmount) {
-        //tutaj blad rozwiaz pls 
-
+       
+        $this->connectWithDatabase();
         $insertQuery = " INSERT INTO conversions (convertedAmount, midFrom, codeFrom, currencyFrom, midTo, codeTo, currencyTo)
         SELECT
             '$convertedAmount' AS convertedAmount,
