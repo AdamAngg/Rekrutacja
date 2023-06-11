@@ -9,27 +9,27 @@ class HomeController
     
     }
     public function conversion($amount, $currencyFrom, $currencyTo) {
+        //tworze tablice z dwoma zmiennymi 
         $currencyFromInfo = explode('|',$currencyFrom);
         $midFrom = $currencyFromInfo[0];
+        //sprawdzam czy dana zmienna istnieje inaczej nie zapisuje do niej danych
         isset($currencyFromInfo[1]) ? $idFrom = $currencyFromInfo[1] : $idFrom = "";
         
-
+        
         $currencyToInfo = explode('|',$currencyTo);
         $midTo = $currencyToInfo[0];
         isset($currencyTo[1])? $idTo = $currencyToInfo[1] : $idTo = "";
        
-        
+        //sprawdzam dla zmiennej czy jest zmienną jeżeli nie wysyłam wyjątek
         $digitArray = [$amount,$midFrom, $idFrom, $midTo, $idTo];
         foreach($digitArray as $digit){
         if(!(filter_var($digit,FILTER_VALIDATE_FLOAT))){
             throw new Exception("added value is not a number. Please re-enter. Wrong value: ".$digit);
             break; 
         }}
-
+        //przewalutowana wartość
         $convertedAmount = round(($amount/$midTo)*$midFrom,2);
-        if($amount !== ""){
-            $this->model->addLatestConversions($idFrom, $idTo, $convertedAmount);
-        }
+        $amount !== ""? $this->model->addLatestConversions($idFrom, $idTo, $convertedAmount) :  throw new Exception("Fill missing field");
         
         
     }
@@ -38,6 +38,7 @@ class HomeController
         $error = "";
 
     try{
+        //Inicjalizacja funckji na stronie głównej
         $this->model = new HomeModel();  
         $tableMarkUp = $this->model->generateMarkUPTable();
         $currencies = $this->model->dataCurrencies;
@@ -46,6 +47,7 @@ class HomeController
         if (isset($_POST['amount'])) {
             $this->conversion($_POST['amount'],$_POST['currencyFrom'],$_POST['currencyTo']);
         }
+    //obsługa wyjątków 
     } catch (Exception $e){
            $error = "An error occured: ".$e->getMessage();
     }  

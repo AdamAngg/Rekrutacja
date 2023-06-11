@@ -8,23 +8,24 @@ class HomeModel {
     
     public $dataConversions;
 
-    //łączenie z baza danych
+    //Inicjalizacja pobrania danych z API i wysłania ich do bazy danych
     public function __construct(){
        $this->fetchDataFromAPI();
        $this->passDataToDB();
     }
-
+    //łączenie z baza danych
     private function connectWithDatabase(){
         require '../src/config/database.php';
         
         $this->database = new mysqli($config['host'], $config['username'], $config['password'], $config['database']);
-    
+        //wysyłanie błędu gdy połączenie napotka error
         if($this->database->connect_errno){
             $error = $this->database->connect_error;
             throw new Exception("An error occurred with Database connection: $error");
         }
 
     }
+    //Funckja odpowiadająca za pobranie informacji z API 
     private function fetchDataFromAPI() {
         $url =  "http://api.nbp.pl/api/exchangerates/tables/a";
         $curl = curl_init($url);
@@ -43,12 +44,14 @@ class HomeModel {
             throw new Exception("Api error".$error_code);  
         }
     }
+    //wyciągniecie wszystkich rekordów z tabeli currencies i dodanie do zmiennej stanu klasy
     private function getDataFromDB(){
         $this->connectWithDatabase();
         $selectAllQuery = "SELECT * FROM currencies";
         $this->dataCurrencies = $this->database->query($selectAllQuery);
         $this->database->close();
     }
+    //Wysyłanie informacji z API do bazydanych 
     private function passDataToDB() {
         $this->getDataFromDB();
         $this->connectWithDatabase(); 
@@ -64,13 +67,14 @@ class HomeModel {
         
             $result = $this->database->query($singleRecordQuery);
             $databaseRecord = $result->fetch_assoc();
-        
+        //Sprawdzam czy w którymś z rekordów nastąpiła zmiana kursu jeżeli tak aktualizuje go
             if($databaseRecord['currency'] === $currencyName && $databaseRecord['mid'] !== $currencyMid){
                 $updateSingleRecordQuery = "UPDATE currencies SET mid = '$currencyMid' WHERE id = ".$databaseRecord['id'];
                 $updateResult = $this->database->query($updateSingleRecordQuery);
 
                 if(!$updateResult) throw new Exception($this->database->error);
             }
+        //Sprawdzm czy nie pojawiła się nowa waluta jeżeli tak dodaje tylko ją do bazy
             if($result->num_rows === 0 ){
                 $insertSingleRecordQuery = "INSERT INTO currencies (currency, code, mid) VALUES ('$currencyName', '$currencyCode', '$currencyMid')";
                 $insertResult = $this->database->query($insertSingleRecordQuery);
@@ -78,6 +82,7 @@ class HomeModel {
                 if(!$insertResult) throw new Exception($this->database->error);
             }
         }
+        //Jeżeli zapytanie zwróci mi pustą bazę dodaje wszystkie kursy z API 
     } else {
 
         foreach($this->dataAPI[0]['rates'] as $currency) {
@@ -96,6 +101,7 @@ class HomeModel {
        }
       
     }
+    //Generuje tabele zależną od tabeli currencies która zostanie wyświetlona we view
     public function generateMarkUPTable() {
         $tableMarkUp = " ";
         if($this->dataCurrencies->num_rows > 0){
@@ -114,6 +120,7 @@ class HomeModel {
         }
         return $tableMarkUp;
         }
+    //Generuje tabele zależną od tabeli currencies która zostanie wyświetlona we view
     public function generateMarkUPTableLatestConversions() {
         $this->getLatestDataConversions();
         $tableMarkUp = " ";
@@ -137,9 +144,12 @@ class HomeModel {
         }
         return $tableMarkUp;
         }
+    //Dodaje do bazy danych szczegółowe informacje o przewalutowaniach
     public function addLatestConversions($idFrom, $idTo, $convertedAmount) {
        
-        
+        // zapytanie które wyszukuje dwa różne rekordy 
+        // są inne w zależności od id które zostaje podane we select'cie
+        // następnie zostają one dodane do innej tabeli z roszerzonymi informacjami
         $insertQuery = " INSERT INTO conversions (convertedAmount, midFrom, codeFrom, currencyFrom, midTo, codeTo, currencyTo)
         SELECT
             '$convertedAmount' AS convertedAmount,
@@ -153,11 +163,13 @@ class HomeModel {
        
         
             $this->connectWithDatabase();
+        //Wysłanie i obsługa wyjątku
             $result = $this->database->query($insertQuery);
             if(!$result) throw new Exception($this->database->error);
         
         $this->database->close();
     }
+    // ściaganie wzystkich informacji z tablicy conversions
     public function getLatestDataConversions(){
         $selectQuery = "SELECT * FROM conversions";
         $this->connectWithDatabase();
