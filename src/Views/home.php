@@ -11,6 +11,7 @@
 <body>
     <h1>Witam na mojej stronie</h1>
     <?= $tableMarkUp ?>
+   
 
     <form action="HomeController.php" method="POST">
         <label for="amount">Amount:</label>
@@ -20,7 +21,7 @@
         <select id="currencyFrom" name="currencyFrom">
 
             <?php foreach ($currencies as $currency): ?>
-                <option value="<?php echo $currency['mid']; ?>"><?php echo $currency['code']."-".$currency['currency']; ?></option>
+                <option value="<?php echo $currency['mid'].'|'.$currency['id']?>"><?php echo $currency['code']."-".$currency['currency']; ?></option>
             <?php endforeach; ?>
 
         </select>
@@ -30,7 +31,7 @@
         <select id="currencyTo" name="currencyTo">
 
             <?php foreach ($currencies as $currency): ?>
-                <option value="<?php echo $currency['mid']; ?>"><?php echo $currency['code']."-".$currency['currency']; ?></option>
+                <option value="<?php echo $currency['mid'].'|'.$currency['id']?>"><?php echo $currency['code']."-".$currency['currency']; ?></option>
             <?php endforeach; ?>
 
         </select>

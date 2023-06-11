@@ -9,10 +9,22 @@ class HomeController
    
     }
     public function conversion($amount, $currencyFrom, $currencyTo) {
-        if(filter_var($amount,FILTER_VALIDATE_FLOAT) && filter_var($currencyFrom, $currencyTo,FILTER_VALIDATE_FLOAT)){
+        $currencyFromInfo = explode('|',$currencyFrom);
+        $midFrom = $currencyFromInfo[0];
+        $idFrom = $currencyFromInfo[1];
+
+        $currencyToInfo = explode('|',$currencyTo);
+        $midTo = $currencyToInfo[0];
+        $idTo = $currencyToInfo[1];
+        
+        if(!(filter_var($amount,FILTER_VALIDATE_FLOAT))){
+            echo "An error ocured, added value is not a number. Please re-enter";
             return 0;
         }
-        $convertedAmount = round(($amount/$currencyTo)*$currencyFrom,2);
+        $convertedAmount = round(($amount/$midTo)*$midFrom,2);
+        if($amount !== ""){
+            $this->model->addLatestConversions($idFrom, $idTo, $convertedAmount);
+        }
         
         
     }
@@ -23,7 +35,7 @@ class HomeController
         
         $this->model = new HomeModel();
         
-        $tableMarkUp = $this->model->generateTable();
+        $tableMarkUp = $this->model->generateMarkUPTable();
         $currencies = $this->model->dataDB;
 
         if (isset($_POST['amount'])) {

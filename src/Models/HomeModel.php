@@ -13,12 +13,13 @@ class HomeModel {
     }
 
     private function connectWithDatabase(){
-        require_once '../src/config/database.php';
+        require '../src/config/database.php';
+        
         $this->database = new mysqli($config['host'], $config['username'], $config['password'], $config['database']);
-
+    
         if($this->database->connect_errno){
-            $error = $this->database->connect_errno;
-            die("An error occurred with Database connection $error");
+            $error = $this->database->connect_error;
+            throw new Exception("An error occurred with Database connection: $error");
         }
 
     }
@@ -89,14 +90,14 @@ class HomeModel {
             }  
         }
        }
-        $this->database->close();
+      
     }
-    public function generateTable() {
+    public function generateMarkUPTable() {
         $tableMarkUp = '';
         if($this->dataDB->num_rows > 0){
             $tableMarkUp .= "<table>";
             $tableMarkUp .=  "<tr><th>Currency</th><th>Code</th><th>Mid</th></tr>";
-            while ($row = $this->dataDB->fetch_assoc()) {
+            foreach ($this->dataDB as $row) {
                 $tableMarkUp .=  "<tr>";
                 $tableMarkUp .=  "<td>" . $row['currency'] . "</td>";
                 $tableMarkUp .=  "<td>" . $row['code'] . "</td>";
@@ -110,6 +111,28 @@ class HomeModel {
         return $tableMarkUp;
         }
     
-    }
+    public function addLatestConversions($idFrom, $idTo, $convertedAmount) {
+        //tutaj blad rozwiaz pls 
 
+        $insertQuery = " INSERT INTO conversions (convertedAmount, midFrom, codeFrom, currencyFrom, midTo, codeTo, currencyTo)
+        SELECT
+            '$convertedAmount' AS convertedAmount,
+            (SELECT mid FROM currencies WHERE id = '$idFrom') AS midFrom,
+            (SELECT code FROM currencies WHERE id = '$idFrom') AS codeFrom,
+            (SELECT currency FROM currencies WHERE id = '$idFrom') AS currencyFrom,
+            (SELECT mid FROM currencies WHERE id = '$idTo') AS midTo,
+            (SELECT code FROM currencies WHERE id = '$idTo') AS codeTo,
+            (SELECT currency FROM currencies WHERE id = '$idTo') AS currencyTo;
+    ";
+       
+        try{
+            $result = $this->database->query($insertQuery);
+            if(!$result) throw new Exception($this->database->error);
+        } catch (Exception $e) {
+            echo "An error occured with database query: ". $e->getMessage();
+        }
+        $this->database->close();
+    }
+    }
+    
 ?>
