@@ -1,6 +1,6 @@
 <?php
 
-require "../src/Controllers/HomeController.php";
+require "src/Controllers/HomeController.php";
 
 // Tworzenie kontrolera
 $controller = new HomeController();
