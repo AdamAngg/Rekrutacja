@@ -39,7 +39,8 @@ class HomeController
         
     }
     public function home(){
-        require_once '../src/models/HomeModel.php';
+
+    require_once '../src/models/HomeModel.php';
         $error = "";
 
     try{
