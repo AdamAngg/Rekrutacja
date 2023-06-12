@@ -7,6 +7,7 @@ $config = [
     'host' => $dbUrl['host'],
     'username' => $dbUrl['user'],
     'password' => $dbUrl['pass'],
+    'port'=> $dbUrl['port'],
     'database' => substr($dbUrl['path'], 1),
 ];
 // $config = [
