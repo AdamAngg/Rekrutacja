@@ -39,7 +39,7 @@ class HomeController
         
     }
     public function home(){
-        require_once '../src/models/HomeModel.php';
+        require_once 'src\Models\HomeModel.php';
         $error = "";
 
     try{
@@ -58,7 +58,7 @@ class HomeController
     } catch (Exception $e){
            $error = "An error occured: ".$e->getMessage();
     }  
-        require '../src/views/home.php';
+        require 'src\Views\home.php';
     }
 
     public function notFound()

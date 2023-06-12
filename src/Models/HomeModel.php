@@ -15,7 +15,7 @@ class HomeModel {
     }
     //łączenie z baza danych
     private function connectWithDatabase(){
-        require '../src/config/database.php';
+        require 'src\config\database.php';
         
         $this->database = new mysqli($config['host'], $config['username'], $config['password'],$config['port'], $config['database']);
         //wysyłanie błędu gdy połączenie napotka error
