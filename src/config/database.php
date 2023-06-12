@@ -4,11 +4,11 @@ $url = "mysql://h0vtr8hvmv68opym:lq5jpgngn1e96ed1@c8u4r7fp8i8qaniw.chr7pe7iynqr.
 $dbUrl = parse_url($url);
 
 $config = [
-    'host' => $dbUrl['host'],
-    'username' => $dbUrl['user'],
-    'password' => $dbUrl['pass'],
-    'port'=> $dbUrl['port'],
-    'database' => substr($dbUrl['path'], 1),
+    'host' => 'c8u4r7fp8i8qaniw.chr7pe7iynqr.eu-west-1.rds.amazonaws.com',
+    'username' => 'h0vtr8hvmv68opym',
+    'password' => 'lq5jpgngn1e96ed1',
+    'port'=> '3306',
+    'database' => 'stzxlcbiu7tjcih7',
 ];
 // $config = [
 //     'host' => 'localhost',
